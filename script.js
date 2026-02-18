@@ -5,13 +5,14 @@ const taskList = document.getElementById('taskList');
 
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-addBtn.addEventListener('click', ()=>{
+addBtn.addEventListener('click', () => {
     const title = taskTitle.value;
     const priority = taskPriority.value;
 
-    if(title ==='' || priority === 'select') return;
+    if (title === '' || priority === 'select') return;
 
-    const {date, time} = getCurrentTime();
+    const { date, time } = getCurrentTime();
+
 
     tasks.push({
         title,
@@ -27,39 +28,60 @@ addBtn.addEventListener('click', ()=>{
 });
 
 
-function saveToLocalStorage(){
+function saveToLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 
-function renderTasks(){
+function renderTasks() {
     taskList.innerHTML = '';
 
     tasks.forEach((task, index) => {
         const li = document.createElement('li');
 
-        li.innerHTML= `
+        //HTML Code
+        li.innerHTML = `
         <strong>${task.title}</strong>
         (${task.priority})
         <br>
         <small>${task.createdDate} | ${task.createdTime}</small>
+        <button class='statusBtn'></button>
         `;
+
+
+        //status logic
+        const statusBtn = li.querySelector('.statusBtn');
+        statusBtn.textContent = task.status;
+
+        statusBtn.addEventListener('click', () => {
+            if (task.status === 'pending') {
+                task.status = 'in-progress';
+            } else if (task.status === 'in-progress') {
+                task.status = 'completed';
+            } else {
+                task.status = 'pending';
+            }
+
+            saveToLocalStorage();
+            renderTasks();
+        });
+
 
         taskList.appendChild(li);
     });
 }
 
 
-function clearInputs(){
+function clearInputs() {
     taskTitle.value = '';
     taskPriority.value = 'select';
 }
 
 
-function getCurrentTime(){
+function getCurrentTime() {
     const now = new Date();
 
-    const date = now.toLocaleDateString('en-IN',{
+    const date = now.toLocaleDateString('en-IN', {
         day: '2-digit',
         month: '2-digit',
         year: '2-digit'
@@ -70,5 +92,5 @@ function getCurrentTime(){
         minute: '2-digit'
     });
 
-    return {date, time};
+    return { date, time };
 }
