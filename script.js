@@ -5,6 +5,7 @@ const taskList = document.getElementById('taskList');
 const filter = document.getElementById('filter');
 
 let currentFilter = 'all';
+let editIndex = null;
 
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
@@ -17,13 +18,26 @@ addBtn.addEventListener('click', () => {
     const { date, time } = getCurrentTime();
 
 
-    tasks.push({
-        title,
-        priority,
-        status: 'pending',
-        createdDate: date,
-        createdTime: time,
-    });
+    if (editIndex == null) {
+        tasks.push({
+            title,
+            priority,
+            status: 'pending',
+            createdDate: date,
+            createdTime: time,
+            updatedDate: null,
+            updatedTime: null,
+        });
+    } else {
+        tasks[editIndex].title = title;
+        tasks[editIndex].priority = priority;
+        tasks[editIndex].updatedDate = date;
+        tasks[editIndex].updatedTime = time;
+
+        editIndex = null;
+        addBtn.textContent = 'Add Task';
+    }
+
 
     saveToLocalStorage();
     renderTasks();
@@ -43,17 +57,18 @@ function renderTasks() {
     //filter logic
     let processedTasks = tasks; //copy the original array in form of processedTasks.
 
-    if(currentFilter==='completed'){
+    if (currentFilter === 'completed') {
         processedTasks = tasks.filter(task => task.status === 'completed');
     }
-    if(currentFilter==='pending'){
+    if (currentFilter === 'pending') {
         processedTasks = tasks.filter(task => task.status === 'pending');
     }
-    if(currentFilter==='in-progress'){
+    if (currentFilter === 'in-progress') {
         processedTasks = tasks.filter(task => task.status === 'in-progress');
     }
 
-    processedTasks.forEach((task, index) => {
+    processedTasks.forEach((task) => {
+        const originalIndex = tasks.indexOf(task); //to use original array index.
         const li = document.createElement('li');
 
         //HTML Code
@@ -61,9 +76,17 @@ function renderTasks() {
         <strong>${task.title}</strong>
         (${task.priority})
         <br>
-        <small>${task.createdDate} | ${task.createdTime}</small>
-        <button class='statusBtn'></button>
+
+        ${task.updatedDate ? `<small>(Edited): ${task.updatedDate} | ${task.updatedTime}</small><br>` : ''}
+        <small>(created): ${task.createdDate} | ${task.createdTime}</small>
+
+        <button class='statusBtn'></button><br>
+
+        ${editIndex !== originalIndex ?
+        `<button class='editBtn'>Edit</button>
+        <button class='delBtn'>delete</button>` : '<br>'}
         `;
+        //in 80th line i use ternary operator for updated date, time ui updation.
 
 
         //status logic
@@ -85,6 +108,30 @@ function renderTasks() {
             saveToLocalStorage();
             renderTasks();
         });
+
+        //delete logic
+        const delBtn = li.querySelector('.delBtn');
+        if (delBtn) {
+            delBtn.addEventListener('click', () => {
+                tasks.splice(originalIndex, 1);
+                saveToLocalStorage();
+                renderTasks();
+            })
+        }
+
+
+        //edit logic
+        const editBtn = li.querySelector('.editBtn');
+        if (editBtn) {
+            editBtn.addEventListener('click', () => {
+                editIndex = originalIndex;
+                taskTitle.value = tasks[editIndex].title;
+                taskPriority.value = tasks[editIndex].priority;
+                addBtn.textContent = 'update';
+
+                renderTasks();
+            })
+        }
 
 
         taskList.appendChild(li);
@@ -115,7 +162,7 @@ function getCurrentTime() {
     return { date, time };
 }
 
-filter.addEventListener('change', ()=>{
-    currentFilter=filter.value;
+filter.addEventListener('change', () => {
+    currentFilter = filter.value;
     renderTasks();
 })
