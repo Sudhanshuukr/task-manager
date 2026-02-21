@@ -3,6 +3,7 @@ const taskPriority = document.getElementById('dropdown');
 const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById('taskList');
 const filter = document.getElementById('filter');
+const dueDateInput = document.getElementById('dueDate');
 
 let currentFilter = 'all';
 let editIndex = null;
@@ -12,6 +13,7 @@ let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 addBtn.addEventListener('click', () => {
     const title = taskTitle.value;
     const priority = taskPriority.value;
+    const dueDate = dueDateInput.value;
 
     if (title === '' || priority === 'select') return;
 
@@ -27,12 +29,14 @@ addBtn.addEventListener('click', () => {
             createdTime: time,
             updatedDate: null,
             updatedTime: null,
+            dueDate: dueDate || null,
         });
     } else {
         tasks[editIndex].title = title;
         tasks[editIndex].priority = priority;
         tasks[editIndex].updatedDate = date;
         tasks[editIndex].updatedTime = time;
+        tasks[editIndex].dueDate = dueDate;
 
         editIndex = null;
         addBtn.textContent = 'Add Task';
@@ -50,8 +54,10 @@ function saveToLocalStorage() {
 }
 
 
+
 function renderTasks() {
     taskList.innerHTML = '';
+    const today = new Date().toISOString().split('T')[0];
 
 
     //filter logic
@@ -78,7 +84,9 @@ function renderTasks() {
         <br>
 
         ${task.updatedDate ? `<small>(Edited): ${task.updatedDate} | ${task.updatedTime}</small><br>` : ''}
-        <small>(created): ${task.createdDate} | ${task.createdTime}</small>
+        <small>(created): ${task.createdDate} | ${task.createdTime}</small><br>
+
+        ${task.dueDate ? `<small>(Due): ${task.dueDate}</small><br>`:''}
 
         <button class='statusBtn'></button><br>
 
@@ -86,7 +94,12 @@ function renderTasks() {
         `<button class='editBtn'>Edit</button>
         <button class='delBtn'>delete</button>` : '<br>'}
         `;
-        //in 80th line i use ternary operator for updated date, time ui updation.
+        //in 83th line i use ternary operator for updated date, time ui updation.
+
+        
+        if(task.dueDate && task.dueDate < today && task.status !== 'completed'){
+            li.style.backgroundColor = '#ffe5e5' //light red
+        }
 
 
         //status logic
