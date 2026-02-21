@@ -8,12 +8,18 @@
 <body>
     <div class="container">
         <div id="heading">task manager</div>
-        <input type="text" id="inputBox" placeholder="Task Title"><br>
+        <input type="text" id="inputBox" placeholder="Task Title">
         <select id="dropdown">
             <option value="select" selected>select</option>
             <option value="low">low</option>
             <option value="medium">medium</option>
             <option value="high">high</option>
+        </select><br>
+        <select id="filter">
+            <option value="All" selected>All</option>
+            <option value="completed" >completed</option>
+            <option value="in-progress" >in-progress</option>
+            <option value="pending" >pending</option>
         </select>
         <button id="addBtn">Add Task</button>
 

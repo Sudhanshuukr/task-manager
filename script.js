@@ -2,6 +2,9 @@ const taskTitle = document.getElementById('inputBox');
 const taskPriority = document.getElementById('dropdown');
 const addBtn = document.getElementById('addBtn');
 const taskList = document.getElementById('taskList');
+const filter = document.getElementById('filter');
+
+let currentFilter = 'all';
 
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
@@ -36,7 +39,21 @@ function saveToLocalStorage() {
 function renderTasks() {
     taskList.innerHTML = '';
 
-    tasks.forEach((task, index) => {
+
+    //filter logic
+    let processedTasks = tasks; //copy the original array in form of processedTasks.
+
+    if(currentFilter==='completed'){
+        processedTasks = tasks.filter(task => task.status === 'completed');
+    }
+    if(currentFilter==='pending'){
+        processedTasks = tasks.filter(task => task.status === 'pending');
+    }
+    if(currentFilter==='in-progress'){
+        processedTasks = tasks.filter(task => task.status === 'in-progress');
+    }
+
+    processedTasks.forEach((task, index) => {
         const li = document.createElement('li');
 
         //HTML Code
@@ -56,10 +73,13 @@ function renderTasks() {
         statusBtn.addEventListener('click', () => {
             if (task.status === 'pending') {
                 task.status = 'in-progress';
+                console.log(task.status);
             } else if (task.status === 'in-progress') {
                 task.status = 'completed';
+                console.log(task.status);
             } else {
                 task.status = 'pending';
+                console.log(task.status);
             }
 
             saveToLocalStorage();
@@ -94,3 +114,8 @@ function getCurrentTime() {
 
     return { date, time };
 }
+
+filter.addEventListener('change', ()=>{
+    currentFilter=filter.value;
+    renderTasks();
+})
